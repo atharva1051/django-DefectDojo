@@ -185,6 +185,13 @@
                                             </a>
                                           </li>
                                         {% endif %}
+                                        {% if user.is_staff %}
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'edit_product' prod.id %}">
+                                                    <i class="fas fa-pencil-alt"></i> Edit
+                                                </a>
+                                            </li>
+                                        {% endif %}
                                       </ul>
                                     </div>
                                    </div>

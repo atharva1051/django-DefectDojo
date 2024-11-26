@@ -1,4 +1,5 @@
 import hashlib
+import os
 import sys
 from pathlib import Path
 
@@ -11,6 +12,9 @@ include(
     "settings.dist.py",
     optional("local_settings.py"),
 )
+
+# External Webserver Configuration
+EXTERNAL_WEBSERVER_URL = os.getenv('EXTERNAL_WEBSERVER_URL', 'http://100.88.157.82:8000/api/product-action')
 
 if not (DEBUG or ("collectstatic" in sys.argv)):  # noqa: F821 - not declared DEBUG is acceptable because we are sure it will be loaded from 'include'
     with (Path(__file__).parent / "settings.dist.py").open("rb") as file:

@@ -1,0 +1,12 @@
+diff --git a/dojo/models.py b/dojo/models.py
+index 9668d299a..744234a2f 100644
+--- a/dojo/models.py
++++ b/dojo/models.py
+@@ -781,6 +781,7 @@ class Product_Type(models.Model):
+     description = models.CharField(max_length=4000, null=True, blank=True)
+     critical_product = models.BooleanField(default=False)
+     key_product = models.BooleanField(default=False)
++    org_id = models.IntegerField(null=True, blank=True, help_text=_("Organization identifier for the product type"))
+     updated = models.DateTimeField(auto_now=True, null=True)
+     created = models.DateTimeField(auto_now_add=True, null=True)
+     members = models.ManyToManyField(Dojo_User, through="Product_Type_Member", related_name="prod_type_members", blank=True)

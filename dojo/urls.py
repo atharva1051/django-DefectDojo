@@ -91,6 +91,7 @@ from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
 from dojo.notifications.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
+from dojo.product import views as product_views
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
 from dojo.regulations.urls import urlpatterns as regulations
@@ -246,6 +247,8 @@ urlpatterns += [
     re_path(r"^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$", views.manage_files, name="manage_files"),
     re_path(r"^access_file/(?P<fid>\d+)/(?P<oid>\d+)/(?P<obj_type>\w+)$", views.access_file, name="access_file"),
     re_path(r"^{}/(?P<path>.*)$".format(settings.MEDIA_URL.strip("/")), views.protected_serve, {"document_root": settings.MEDIA_ROOT}),
+    re_path(r"^product/(?P<pid>\d+)$", product_views.view_product, name="view_product"),
+    re_path(r"^product/(?P<pid>\d+)/action$", product_views.product_action, name="product_action"),
 ]
 
 urlpatterns += api_v2_urls

@@ -21,6 +21,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views import View
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 from github import Github
 
 import dojo.finding.helper as finding_helper
@@ -128,6 +130,8 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
+from django.conf import settings
+import requests
 
 def product(request):
     prods = get_authorized_products(Permissions.Product_View)
@@ -1974,3 +1978,58 @@ def add_product_group(request, pid):
         "form": group_form,
         "product_tab": product_tab,
     })
+
+@login_required
+@require_POST
+def product_action(request, pid):
+    """
+    Endpoint to handle the custom product action that forwards product data to external webserver
+    """
+    try:
+        product = get_object_or_404(Product, id=pid)
+        
+        # Check if user has permission to view this product
+        if not request.user.has_perm('view_product', product):
+            return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+        
+        # External webserver URL - should be configured in settings.py
+        webserver_url = getattr(settings, 'EXTERNAL_WEBSERVER_URL', 'http://100.88.157.82:8000/api/product-action')
+        
+        # Prepare payload
+        payload = {
+            'product_id': pid,
+            'product_name': product.name,
+            'timestamp': timezone.now().isoformat(),
+            'user': request.user.username
+        }
+        
+        # Send request to external webserver
+        response = requests.post(
+            webserver_url,
+            json=payload,
+            timeout=10,  # 10 seconds timeout
+            headers={
+                'Content-Type': 'application/json',
+                'User-Agent': 'DefectDojo/1.0'
+            }
+        )
+        
+        # Check response
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx, 5xx)
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Action completed for product {pid}',
+            'webserver_response': response.json()
+        })
+        
+    except requests.RequestException as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error communicating with external webserver: {str(e)}'
+        }, status=500)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
